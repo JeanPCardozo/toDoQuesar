@@ -153,8 +153,8 @@ export default {
         });
 
         this.tasks.push(valueTask);
-
         this.editor = "";
+        this.validateCheckTasks()
 
         this.$q.notify({
           message: "Tarea Guardada",
@@ -181,6 +181,7 @@ export default {
 
             this.tasks.splice(index, 1);
             this.filterTasks = this.tasks;
+            this.validateCheckTasks()
           } catch (error) {}
         });
     },
