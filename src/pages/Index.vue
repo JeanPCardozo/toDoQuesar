@@ -1,18 +1,11 @@
 <template>
   <div class="q-pa-md q-gutter-sm">
-    <q-input
-      v-model="search"
-      filled
-      type="search"
-      placeholder="Search..."
-      @keyup="filter"
-    >
+    <q-input v-model="search" filled type="search" placeholder="Search...">
       <template v-slot:append>
         <q-icon name="search" />
       </template>
     </q-input>
     <q-editor
-      v-if="editionStatus"
       toolbar-text-color="white"
       toolbar-toggle-color="yellow-8"
       toolbar-bg="primary"
@@ -21,31 +14,13 @@
       v-model="editor"
       :definitions="{
         update: {
-          tip: 'Actualizar Task',
-          icon: 'update',
-          label: 'Actualizar',
-          handler: updateTask
+          tip: this.editionStatus ? 'Actualizar Task' : 'Guardar Task',
+          icon: this.editionStatus ? 'update' : 'save',
+          label: this.editionStatus ? 'Actualizar' : 'Guardar',
+          handler: this.saveOrEditTask
         }
       }"
       :toolbar="[['bold', 'italic', 'strike', 'underline'], ['update']]"
-    />
-    <q-editor
-      v-else
-      toolbar-text-color="white"
-      toolbar-toggle-color="yellow-8"
-      toolbar-bg="primary"
-      content-class="bg-amber-3"
-      min-height="5rem"
-      v-model="editor"
-      :definitions="{
-        save: {
-          tip: 'Guardar Task',
-          icon: 'save',
-          label: 'Guardar',
-          handler: saveWork
-        }
-      }"
-      :toolbar="[['bold', 'italic', 'strike', 'underline'], ['save']]"
     />
 
     <div v-if="username != ''" class="q-gutter-sm">
@@ -76,7 +51,7 @@
       class="row"
       flat
       bordered
-      v-for="(item, key) in filterTasks"
+      v-for="(item, key) in filtered"
       :key="key"
     >
       <q-toggle
@@ -126,6 +101,13 @@ export default {
     };
   },
   methods: {
+    saveOrEditTask() {
+      if (this.editionStatus) {
+        this.updateTask();
+      } else {
+        this.saveWork();
+      }
+    },
     async listTasks() {
       try {
         const resultDB = await db.collection("tasks").get();
@@ -144,11 +126,11 @@ export default {
     async saveWork() {
       try {
         let valueTask = {
-          text: this.editor,
+          text: this.editorTrim,
           status: false
         };
         await db.collection("tasks").add({
-          text: this.editor,
+          text: this.editorTrim,
           status: false
         });
 
@@ -185,12 +167,6 @@ export default {
           } catch (error) {}
         });
     },
-    filter() {
-      this.filterTasks = this.tasks.filter(
-        task =>
-          task.text.toLowerCase().indexOf(this.search.toLowerCase()) !== -1
-      );
-    },
     editTask(id) {
       this.id = id;
       this.editionStatus = true;
@@ -206,23 +182,17 @@ export default {
           .collection("tasks")
           .doc(this.id)
           .update({
-            text: this.editor
+            text: this.editorTrim
           });
 
-        this.tasks.find(task =>
-          task.id === this.id
-            ? (task.text = this.editor)
-            : (task.text = task.text)
-        );
-        this.filterTasks.find(task =>
-          task.id === this.id
-            ? (task.text = this.editor)
-            : (task.text = task.text)
-        );
-        this.editor = "";
+        let taskEdited = this.tasks.find(task => task.id === this.id);
+        taskEdited.text = this.editorTrim;
       } catch (error) {
       } finally {
-        (this.index = 0), (this.id = ""), (this.editionStatus = false);
+        this.index = 0;
+        this.id = "";
+        this.editionStatus = false;
+        this.editor = "";
       }
     },
     async nameUser() {
@@ -252,6 +222,21 @@ export default {
     }
   },
 
+  computed: {
+    filtered() {
+      if (this.search.length > 0) {
+        return (this.filterTasks = this.tasks.filter(
+          task =>
+            task.text.toLowerCase().indexOf(this.search.toLowerCase()) !== -1
+        ));
+      } else {
+        return this.tasks;
+      }
+    },
+    editorTrim() {
+      return this.editor.replace(/<br>/gi, "");
+    }
+  },
   created() {
     this.tasks;
     this.filterTasks = this.tasks;
