@@ -47,33 +47,27 @@
       </q-chip>
     </div>
 
-    <q-card
-      class="row"
-      flat
-      bordered
-      v-for="(item, key) in filtered"
-      :key="key"
-    >
+    <q-card class="row" flat bordered v-for="task in tasks" :key="task.id">
       <q-toggle
         size="sm"
-        v-model="item.status"
+        v-model="task.data.check"
         checked-icon="check"
         color="green"
         unchecked-icon="clear"
-        @input="updateStatus(item.id, item.status)"
+        @input="updateStatus(task.id, task.data)"
       />
       <q-card-section
-        :class="item.status ? 'tachar' : ''"
+        :class="task.data.check ? 'tachar' : ''"
         class="col"
-        v-html="item.text"
+        v-html="task.data.description"
       />
-      <q-btn flat color="warning" icon="edit" @click="editTask(item.id)" />
+      <!-- <q-btn flat color="warning" icon="edit" @click="editTask(item.id)" />-->
       <q-btn
         flat
         :disabled="search ? true : false"
         color="negative"
         icon="delete"
-        @click="deleteTask(key, item.id)"
+        @click="deleteTask(task.id, task.data)"
       />
     </q-card>
 
@@ -84,7 +78,6 @@
 </template>
 
 <script>
-import { db } from "boot/firebase.js";
 export default {
   data() {
     return {
@@ -105,48 +98,62 @@ export default {
       if (this.editionStatus) {
         this.updateTask();
       } else {
-        this.saveWork();
+        this.createTask();
       }
     },
+    async updateStatus(id, info) {
+      await this.$axios
+        .put(
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`,
+          {
+            description: info.description,
+            check: !!info.check,
+            status: true
+          }
+        )
+        .then(() => this.$mount());
+
+      this.CheckTasks();
+    },
     async listTasks() {
-      try {
-        const resultDB = await db.collection("tasks").get();
-        resultDB.forEach(result => {
-          const task = {
-            id: result.id,
-            text: result.data().text,
-            status: result.data().status
-          };
+      this.tasks = [];
+      const { data } = await this.$axios.get(
+        "https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks.json"
+      );
 
-          this.tasks.push(task);
-        });
-        this.validateCheckTasks();
-      } catch (error) {}
+      for (let item in data) {
+        if (data[item].status === true) {
+          this.tasks.push({
+            id: item,
+            data: data[item]
+          });
+        }
+      }
+
+      this.CheckTasks();
     },
-    async saveWork() {
-      try {
-        let valueTask = {
-          text: this.editorTrim,
-          status: false
-        };
-        await db.collection("tasks").add({
-          text: this.editorTrim,
-          status: false
-        });
+    async createTask() {
+      await this.$axios
+        .post(
+          "https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks.json",
+          {
+            check: false,
+            description: this.editor,
+            status: true
+          }
+        )
+        .then(() => this.listTasks());
+      this.editor = "";
+      this.CheckTasks();
 
-        this.tasks.push(valueTask);
-        this.editor = "";
-        this.validateCheckTasks();
-
-        this.$q.notify({
-          message: "Tarea Guardada",
-          color: "green-4",
-          textColor: "white",
-          icon: "cloud_done"
-        });
-      } catch (error) {}
+      this.$q.notify({
+        message: "Tarea Guardada",
+        color: "green-4",
+        textColor: "white",
+        icon: "cloud_done"
+      });
     },
-    deleteTask(index, id) {
+    deleteTask(id, info) {
       this.$q
         .dialog({
           title: "Eliminar Tarea",
@@ -155,16 +162,19 @@ export default {
           persistent: true
         })
         .onOk(async () => {
-          try {
-            await db
-              .collection("tasks")
-              .doc(id)
-              .delete();
+          await this.$axios
+            .put(
+              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`,
+              {
+                description: info.description,
+                check: !!info.check,
+                status: false
+              }
+            )
+            .then(() => this.listTasks());
 
-            this.tasks.splice(index, 1);
-            this.filterTasks = this.tasks;
-            this.validateCheckTasks();
-          } catch (error) {}
+          //this.filterTasks = this.tasks;
+          this.CheckTasks();
         });
     },
     editTask(id) {
@@ -199,23 +209,12 @@ export default {
       const resultDB = await db.collection("user").get();
       resultDB.forEach(user => (this.username = user.data().name));
     },
-    async updateStatus(id, status) {
-      await db
-        .collection("tasks")
-        .doc(id)
-        .update({
-          status: status
-        });
-      this.tasks.find(task =>
-        task.id === id ? (task.status = status) : (task.status = task.status)
-      );
-      this.validateCheckTasks();
-    },
-    validateCheckTasks() {
+
+    CheckTasks() {
       this.countCheckedTasks = 0;
       this.countWithoutCheckTasks = 0;
       this.tasks.forEach(task =>
-        task.status == true
+        task.data.check === true
           ? this.countCheckedTasks++
           : this.countWithoutCheckTasks++
       );
