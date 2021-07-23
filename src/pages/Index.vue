@@ -79,19 +79,17 @@
 
 <script>
 export default {
-  data() {
-    return {
-      countCheckedTasks: 0,
-      countWithoutCheckTasks: 0,
-      search: "",
-      editor: "",
-      editionStatus: false,
-      tasks: [],
-      idEdit: "",
+  data: () => ({
+    countCheckedTasks: 0,
+    countWithoutCheckTasks: 0,
+    search: "",
+    editor: "",
+    editionStatus: false,
+    tasks: [],
+    idEdit: "",
 
-      username: ""
-    };
-  },
+    username: ""
+  }),
   methods: {
     saveOrEditTask() {
       if (this.editionStatus) {
@@ -201,7 +199,7 @@ export default {
         )
         .then(() => {
           this.editionStatus = false;
-          this.editor = ""
+          this.editor = "";
           this.listTasks();
 
           this.$q.notify({
@@ -236,7 +234,6 @@ export default {
     }
   },
   created() {
-    this.filterTasks = this.tasks;
     this.listTasks();
   }
 };
