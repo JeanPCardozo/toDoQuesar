@@ -61,7 +61,7 @@
         class="col"
         v-html="task.data.description"
       />
-      <!-- <q-btn flat color="warning" icon="edit" @click="editTask(item.id)" />-->
+      <q-btn flat color="warning" icon="edit" @click="editTask(task.id)" />
       <q-btn
         flat
         :disabled="search ? true : false"
@@ -81,16 +81,15 @@
 export default {
   data() {
     return {
-      check: false,
       countCheckedTasks: 0,
       countWithoutCheckTasks: 0,
       search: "",
       editor: "",
-      filterTasks: [],
+      editionStatus: false,
       tasks: [],
-      id: "",
-      username: "",
-      editionStatus: false
+      idEdit: "",
+
+      username: ""
     };
   },
   methods: {
@@ -138,7 +137,7 @@ export default {
           "https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks.json",
           {
             check: false,
-            description: this.editor,
+            description: this.editorTrim,
             status: true
           }
         )
@@ -177,39 +176,42 @@ export default {
           this.CheckTasks();
         });
     },
-    editTask(id) {
-      this.id = id;
+    async editTask(id) {
       this.editionStatus = true;
-      this.tasks.find(task => {
-        if (task.id === this.id) {
-          this.editor = task.text;
-        }
-      });
+      const { data } = await this.$axios.get(
+        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`
+      );
+
+      this.editor = data.description;
+      this.idEdit = id;
     },
     async updateTask() {
-      try {
-        await db
-          .collection("tasks")
-          .doc(this.id)
-          .update({
-            text: this.editorTrim
+      const { data } = await this.$axios.get(
+        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.idEdit}.json`
+      );
+
+      await this.$axios
+        .put(
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.idEdit}.json`,
+          {
+            description: this.editorTrim,
+            status: data.status,
+            check: data.check
+          }
+        )
+        .then(() => {
+          this.editionStatus = false;
+          this.editor = ""
+          this.listTasks();
+
+          this.$q.notify({
+            message: "Tarea Actualizada",
+            color: "green-4",
+            textColor: "white",
+            icon: "cloud_done"
           });
-
-        let taskEdited = this.tasks.find(task => task.id === this.id);
-        taskEdited.text = this.editorTrim;
-      } catch (error) {
-      } finally {
-        this.index = 0;
-        this.id = "";
-        this.editionStatus = false;
-        this.editor = "";
-      }
+        });
     },
-    async nameUser() {
-      const resultDB = await db.collection("user").get();
-      resultDB.forEach(user => (this.username = user.data().name));
-    },
-
     CheckTasks() {
       this.countCheckedTasks = 0;
       this.countWithoutCheckTasks = 0;
@@ -219,28 +221,23 @@ export default {
           : this.countWithoutCheckTasks++
       );
     }
+    /*async nameUser() {
+      const resultDB = await db.collection("user").get();
+      resultDB.forEach(user => (this.username = user.data().name));
+    },*/
   },
 
   computed: {
-    filtered() {
-      if (this.search.length > 0) {
-        return (this.filterTasks = this.tasks.filter(
-          task =>
-            task.text.toLowerCase().indexOf(this.search.toLowerCase()) !== -1
-        ));
-      } else {
-        return this.tasks;
-      }
+    filteredTasks() {
+      return this.search != "" ? this.tasks.includes(this.search) : this.tasks;
     },
     editorTrim() {
       return this.editor.replace(/<br>/gi, "");
     }
   },
   created() {
-    this.tasks;
     this.filterTasks = this.tasks;
     this.listTasks();
-    this.nameUser();
   }
 };
 </script>
