@@ -47,7 +47,13 @@
       </q-chip>
     </div>
 
-    <q-card class="row" flat bordered v-for="task in tasks" :key="task.id">
+    <q-card
+      class="row"
+      flat
+      bordered
+      v-for="task in filteredTasks"
+      :key="task.id"
+    >
       <q-toggle
         size="sm"
         v-model="task.data.check"
@@ -227,7 +233,14 @@ export default {
 
   computed: {
     filteredTasks() {
-      return this.search != "" ? this.tasks.includes(this.search) : this.tasks;
+      return this.search != ""
+        ? this.tasks.filter(task =>
+            task.data.description
+              .toUpperCase()
+              .trim()
+              .includes(this.search.toUpperCase().trim())
+          )
+        : this.tasks;
     },
     editorTrim() {
       return this.editor.replace(/<br>/gi, "");
