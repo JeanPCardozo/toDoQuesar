@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Todo Windows
+          TodoQuasar
         </q-toolbar-title>
 
         <!--<q-toggle
@@ -59,8 +59,13 @@ const linksData = [
     icon: "notes"
   },
   {
-    title: "Actualizar / Registrar Datos Usuario",
-    to: "/Data",
+    title: "Registrar Usuario",
+    to: "/Register",
+    icon: "person"
+  },
+  {
+    title: "Iniciar sesión",
+    to: "/LogIn",
     icon: "person"
   }
 ];
