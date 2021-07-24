@@ -70,7 +70,6 @@
       <q-btn flat color="warning" icon="edit" @click="editTask(task.id)" />
       <q-btn
         flat
-        :disabled="search ? true : false"
         color="negative"
         icon="delete"
         @click="deleteTask(task.id, task.data)"
