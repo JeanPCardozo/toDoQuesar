@@ -13,14 +13,14 @@
       min-height="5rem"
       v-model="editor"
       :definitions="{
-        update: {
+        createUpdate: {
           tip: this.editionStatus ? 'Actualizar Task' : 'Guardar Task',
           icon: this.editionStatus ? 'update' : 'save',
           label: this.editionStatus ? 'Actualizar' : 'Guardar',
           handler: this.saveOrEditTask
         }
       }"
-      :toolbar="[['bold', 'italic', 'strike', 'underline'], ['update']]"
+      :toolbar="[, ['createUpdate']]"
     />
 
     <div v-if="username != ''" class="q-gutter-sm">
