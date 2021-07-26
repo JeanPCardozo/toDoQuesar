@@ -172,7 +172,15 @@ export default {
                 status: false
               }
             )
-            .then(() => this.listTasks());
+            .then(() => {
+              this.$q.notify({
+                message: "tarea eliminada",
+                color: "green-4",
+                textColor: "white",
+                icon: "cloud_done"
+              });
+              this.listTasks();
+            });
 
           this.CheckTasks();
         });

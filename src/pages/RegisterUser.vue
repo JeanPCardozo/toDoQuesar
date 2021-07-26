@@ -12,6 +12,7 @@
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
               filled
+              color= "blue-9"
               v-model="email"
               label="Digita tu correo"
               lazy-rules
@@ -21,6 +22,7 @@
             />
             <q-input
               filled
+              color= "blue-9"
               v-model="pass1"
               :type="show1 ? 'text' : 'password'"
               label="Digitar contraseña"
@@ -32,12 +34,13 @@
               ]"
               ><template v-slot:append>
                 <q-btn flat @click="show1 = !show1"
-                  ><q-icon :name="show1 ? 'visibility' : 'visibility_off'"
+                  ><q-icon :name="show1 ? 'visibility_off' : 'visibility'"
                 /></q-btn>
               </template>
             </q-input>
             <q-input
               filled
+              color= "blue-9"
               v-model="pass2"
               :type="show ? 'text' : 'password'"
               label="Confirmar contraseña"
@@ -49,7 +52,7 @@
               ]"
               ><template v-slot:append>
                 <q-btn flat @click="show = !show"
-                  ><q-icon :name="show ? 'visibility' : 'visibility_off'"
+                  ><q-icon :name="show ? 'visibility_off' : 'visibility'"
                 /></q-btn>
               </template>
             </q-input>
