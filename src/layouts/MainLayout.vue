@@ -77,7 +77,7 @@ export default {
           this.$router.push({ path: "/LogIn" });
         });
     },
-    validando() {
+    ValidateUser() {
       const user = JSON.parse(localStorage.getItem("user"));
       this.visible = user == null ? true : false;
     }
@@ -86,8 +86,14 @@ export default {
     essentialLinks() {
       return [
         {
-          title: "To-do",
+          title: "Home",
           to: "/",
+          icon: "home",
+          visible: true
+        },
+        {
+          title: "To-do",
+          to: "/Tasks",
           icon: "notes",
           visible: !this.visible
         },
@@ -107,7 +113,7 @@ export default {
     }
   },
   updated() {
-    this.validando()
+    this.ValidateUser()
   }
 };
 </script>

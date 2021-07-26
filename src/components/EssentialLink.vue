@@ -14,8 +14,7 @@
 export default {
   name: "EssentialLink",
   props: {
-    link: Object,
-    visible: Boolean
+    link: Object
   }
 };
 </script>
