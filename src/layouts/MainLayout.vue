@@ -14,14 +14,6 @@
         <q-toolbar-title>
           TodoQuasar
         </q-toolbar-title>
-
-        <!--<q-toggle
-          label="Modo Oscuro"
-          color="red"
-          :false-value="true"
-          :true-value="false"
-          v-model="activeDark"
-        />-->
       </q-toolbar>
     </q-header>
 
@@ -38,9 +30,12 @@
         <EssentialLink
           v-for="link in essentialLinks"
           :key="link.title"
-          v-bind="link"
+          :link="link"
         />
       </q-list>
+      <div v-if="!visible" class="row justify-center q-mt-lg">
+        <q-btn color="red" @click="logout">Cerrar sesión</q-btn>
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -51,34 +46,68 @@
 
 <script>
 import EssentialLink from "components/EssentialLink.vue";
-
-const linksData = [
-  {
-    title: "To-do",
-    to: "/",
-    icon: "notes"
-  },
-  {
-    title: "Registrar Usuario",
-    to: "/Register",
-    icon: "person"
-  },
-  {
-    title: "Iniciar sesión",
-    to: "/LogIn",
-    icon: "person"
-  }
-];
-
 export default {
   name: "MainLayout",
   components: { EssentialLink },
   data() {
     return {
-      activeDark: false,
       leftDrawerOpen: false,
-      essentialLinks: linksData
+      visible: false
     };
+  },
+  methods: {
+    logout() {
+      this.$q
+        .dialog({
+          title: "Cerrar sesión",
+          message: "¿Estás seguro de cerrar sesión?",
+          cancel: true,
+          persistent: true
+        })
+        .onOk(() => {
+          localStorage.removeItem("user");
+
+          this.$q.notify({
+            message: "sesión cerrada",
+            color: "blue-4",
+            textColor: "white",
+            icon: "cloud_done"
+          });
+
+          this.$router.push({ path: "/LogIn" });
+        });
+    },
+    validando() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      this.visible = user == null ? true : false;
+    }
+  },
+  computed: {
+    essentialLinks() {
+      return [
+        {
+          title: "To-do",
+          to: "/",
+          icon: "notes",
+          visible: !this.visible
+        },
+        {
+          title: "Registrar Usuario",
+          to: "/Register",
+          icon: "person",
+          visible: this.visible
+        },
+        {
+          title: "Iniciar sesión",
+          to: "/LogIn",
+          icon: "person",
+          visible: this.visible
+        }
+      ];
+    }
+  },
+  updated() {
+    this.validando()
   }
 };
 </script>

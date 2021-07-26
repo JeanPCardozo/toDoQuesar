@@ -1,11 +1,11 @@
 <template>
-  <q-item clickable :to="to"  v-show="visible">
-    <q-item-section v-if="icon" avatar>
-      <q-icon :name="icon" />
+  <q-item clickable :to="link.to" v-if="link.visible">
+    <q-item-section v-if="link.icon" avatar>
+      <q-icon :name="link.icon" />
     </q-item-section>
 
     <q-item-section>
-      <q-item-label>{{ title }}</q-item-label>
+      <q-item-label>{{ link.title }}</q-item-label>
     </q-item-section>
   </q-item>
 </template>
@@ -14,19 +14,7 @@
 export default {
   name: "EssentialLink",
   props: {
-    title: {
-      type: String,
-      required: true
-    },
-
-    to: {
-      type: String,
-      default: ""
-    },
-    icon: {
-      type: String,
-      default: ""
-    },
+    link: Object,
     visible: Boolean
   }
 };
