@@ -100,7 +100,7 @@ export default {
                 icon: "cloud_done",
                 message: "Registrado"
               });
-              this.$router.push({ path: "/" });
+              this.$router.push({ path: "/Tasks" });
               localStorage.setItem("user", JSON.stringify(response.data));
             })
             .catch(error => console.log(error));

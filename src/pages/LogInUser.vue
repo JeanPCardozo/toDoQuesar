@@ -77,7 +77,7 @@ export default {
                   icon: "cloud_done",
                   message: "Has Iniciado sesión"
                 });
-                this.$router.push({ path: "/" });
+                this.$router.push({ path: "/Tasks" });
                 localStorage.setItem("user", JSON.stringify(response.data));
               })
               .catch(error => {});

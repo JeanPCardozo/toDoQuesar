@@ -89,7 +89,7 @@ export default {
           title: "Home",
           to: "/",
           icon: "home",
-          visible: true
+          visible: this.visible
         },
         {
           title: "To-do",
