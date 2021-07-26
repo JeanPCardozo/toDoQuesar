@@ -23,12 +23,12 @@
       :toolbar="[, ['createUpdate']]"
     />
 
-    <div v-if="username != ''" class="q-gutter-sm">
+    <div v-if="user != ''" class="q-gutter-sm">
       <q-chip>
         <q-avatar>
           <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
         </q-avatar>
-        {{ username }}
+        {{ user.email | username }}
       </q-chip>
     </div>
 
@@ -92,8 +92,7 @@ export default {
     editionStatus: false,
     tasks: [],
     idEdit: "",
-
-    username: ""
+    user: JSON.parse(localStorage.getItem("user"))
   }),
   methods: {
     saveOrEditTask() {
@@ -106,7 +105,7 @@ export default {
     async updateStatus(id, info) {
       await this.$axios
         .put(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`,
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
           {
             description: info.description,
             check: !!info.check,
@@ -120,7 +119,7 @@ export default {
     async listTasks() {
       this.tasks = [];
       const { data } = await this.$axios.get(
-        "https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks.json"
+        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`
       );
 
       for (let item in data) {
@@ -137,7 +136,7 @@ export default {
     async createTask() {
       await this.$axios
         .post(
-          "https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks.json",
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`,
           {
             check: false,
             description: this.editorTrim,
@@ -166,7 +165,7 @@ export default {
         .onOk(async () => {
           await this.$axios
             .put(
-              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`,
+              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
               {
                 description: info.description,
                 check: !!info.check,
@@ -175,14 +174,13 @@ export default {
             )
             .then(() => this.listTasks());
 
-          //this.filterTasks = this.tasks;
           this.CheckTasks();
         });
     },
     async editTask(id) {
       this.editionStatus = true;
       const { data } = await this.$axios.get(
-        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${id}.json`
+        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`
       );
 
       this.editor = data.description;
@@ -190,12 +188,12 @@ export default {
     },
     async updateTask() {
       const { data } = await this.$axios.get(
-        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.idEdit}.json`
+        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`
       );
 
       await this.$axios
         .put(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.idEdit}.json`,
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`,
           {
             description: this.editorTrim,
             status: data.status,
@@ -224,12 +222,19 @@ export default {
           : this.countWithoutCheckTasks++
       );
     }
-    /*async nameUser() {
-      const resultDB = await db.collection("user").get();
-      resultDB.forEach(user => (this.username = user.data().name));
-    },*/
   },
-
+  filters: {
+    username(email) {
+      let arrayText = email.split("");
+      let numberText = -1;
+      for (let i in arrayText) {
+        if (arrayText[i] === "@") {
+          numberText = i;
+        }
+      }
+      return email.slice(0, numberText);
+    }
+  },
   computed: {
     filteredTasks() {
       return this.search != ""
@@ -245,6 +250,7 @@ export default {
       return this.editor.replace(/<br>/gi, "");
     }
   },
+
   created() {
     this.listTasks();
   }
