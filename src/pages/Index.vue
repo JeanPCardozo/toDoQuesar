@@ -23,7 +23,7 @@
       :toolbar="[, ['createUpdate']]"
     />
 
-    <div v-if="user != ''" class="q-gutter-sm">
+    <div v-if="user != null" class="q-gutter-sm">
       <q-chip>
         <q-avatar>
           <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
