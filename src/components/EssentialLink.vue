@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable :to="to">
+  <q-item clickable :to="to"  v-show="visible">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
@@ -26,7 +26,8 @@ export default {
     icon: {
       type: String,
       default: ""
-    }
+    },
+    visible: Boolean
   }
 };
 </script>
