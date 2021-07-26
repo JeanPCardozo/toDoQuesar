@@ -94,7 +94,6 @@ export default {
               returnSecureToken: true
             })
             .then(response => {
-              console.log(response.data);
               this.$q.notify({
                 color: "green-4",
                 textColor: "white",
