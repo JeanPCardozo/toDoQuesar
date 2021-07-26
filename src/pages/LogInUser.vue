@@ -7,7 +7,7 @@
     </p>
 
     <div class=" q-pa-md row q-gutter-md justify-center">
-      <q-card class="text-center col-6 bg-grey-4">
+     <q-card class="text-center col-xs-12 col-sm-8 col-md-6 bg-grey-4">
         <q-card-section>
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
