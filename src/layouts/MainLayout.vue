@@ -50,7 +50,7 @@
           <q-avatar size="56px" class="q-mb-sm">
             <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
           </q-avatar>
-          <div class="text-weight-bold">
+          <div class="text-weight-bold text-capitalize">
             {{ email | username }}
           </div>
           <div>{{ email }}</div>
@@ -105,7 +105,7 @@ export default {
         });
     },
     ValidateUser() {
-      const user =  JSON.parse(localStorage.getItem("user"))
+      const user = JSON.parse(localStorage.getItem("user"));
       this.visible = user == null ? true : false;
       this.email = this.visible ? "" : user.email;
     }
@@ -149,9 +149,7 @@ export default {
           numberText = i;
         }
       }
-      let username = email.slice(0, numberText);
-      let lower = username.toLowerCase();
-      return username.charAt(0).toUpperCase() + lower.slice(1);
+      return email.slice(0, numberText);
     }
   },
   updated() {
