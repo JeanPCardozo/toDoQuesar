@@ -26,6 +26,7 @@
               v-model="pass1"
               :type="show1 ? 'text' : 'password'"
               label="Digitar contraseña"
+              hint="contraseña de más de 6 carácteres"
               lazy-rules
               :rules="[
                 val =>
@@ -44,6 +45,7 @@
               v-model="pass2"
               :type="show ? 'text' : 'password'"
               label="Confirmar contraseña"
+              hint="contraseña de más de 6 carácteres"
               lazy-rules
               :rules="[
                 val =>
