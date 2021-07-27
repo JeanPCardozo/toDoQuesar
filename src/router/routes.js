@@ -13,13 +13,19 @@ const routes = [
         meta: { protect: true }
       },
       {
+        path: "/Profile",
+        component: () => import("src/pages/profile.vue"),
+        meta: { protect: true }
+      },
+      {
         path: "/Register",
         component: () => import("pages/RegisterUser.vue")
       },
       {
         path: "/LogIn",
         component: () => import("pages/LogInUser.vue")
-      }
+      },
+
     ]
   },
 

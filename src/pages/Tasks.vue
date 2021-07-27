@@ -23,15 +23,6 @@
       :toolbar="[, ['createUpdate']]"
     />
 
-    <div v-if="user != null" class="q-gutter-sm">
-      <q-chip>
-        <q-avatar>
-          <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
-        </q-avatar>
-        {{ user.email | username }}
-      </q-chip>
-    </div>
-
     <div>
       <q-chip>
         <q-avatar color="red" text-color="white">{{
@@ -229,18 +220,6 @@ export default {
           ? this.countCheckedTasks++
           : this.countWithoutCheckTasks++
       );
-    }
-  },
-  filters: {
-    username(email) {
-      let arrayText = email.split("");
-      let numberText = -1;
-      for (let i in arrayText) {
-        if (arrayText[i] === "@") {
-          numberText = i;
-        }
-      }
-      return email.slice(0, numberText);
     }
   },
   computed: {
