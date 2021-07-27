@@ -12,7 +12,7 @@
           <q-form @submit="onSubmit" class="q-gutter-md">
             <q-input
               filled
-              color= "blue-9"
+              color="blue-9"
               v-model="email"
               label="Digita tu correo"
               lazy-rules
@@ -22,7 +22,7 @@
             />
             <q-input
               filled
-              color= "blue-9"
+              color="blue-9"
               v-model="pass1"
               :type="show1 ? 'text' : 'password'"
               label="Digitar contraseña"
@@ -40,7 +40,7 @@
             </q-input>
             <q-input
               filled
-              color= "blue-9"
+              color="blue-9"
               v-model="pass2"
               :type="show ? 'text' : 'password'"
               label="Confirmar contraseña"
@@ -58,7 +58,15 @@
             </q-input>
 
             <div>
-              <q-btn label="Registrar usuario" type="submit" color="green" />
+              <q-btn
+                :loading="progress.loading"
+                :percentage="progress.percentage"
+                dark-percentage
+                unelevated
+                label="Registrar usuario"
+                type="submit"
+                color="green"
+              />
             </div>
           </q-form>
         </q-card-section>
@@ -71,6 +79,11 @@
 export default {
   data() {
     return {
+      progress: {
+        loading: false,
+        percentage: 0
+      },
+      interval: null,
       email: "",
       pass1: "",
       pass2: "",
@@ -81,49 +94,60 @@ export default {
 
   methods: {
     async onSubmit() {
-      if (
-        this.pass1 === this.pass2 &&
-        this.pass1.length >= 6 &&
-        this.email != ""
-      ) {
-        if (this.validateEmail) {
-          const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-          const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+      this.progress.loading = true;
+      this.progress.percentage = 0;
 
-          await this.$axios
-            .post(URL, {
-              email: this.email,
-              password: this.pass1,
-              returnSecureToken: true
-            })
-            .then(response => {
+      this.interval = await setInterval(() => {
+        this.progress.percentage += Math.floor(Math.random() * 20);
+
+        if (this.progress.percentage >= 100) {
+          if (
+            this.pass1 === this.pass2 &&
+            this.pass1.length >= 6 &&
+            this.email != ""
+          ) {
+            if (this.validateEmail) {
+              const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+              const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+              try {
+                this.$axios
+                  .post(URL, {
+                    email: this.email,
+                    password: this.pass1,
+                    returnSecureToken: true
+                  })
+                  .then(response => {
+                    this.$q.notify({
+                      color: "green-4",
+                      textColor: "white",
+                      icon: "cloud_done",
+                      message: "Registrado"
+                    });
+                    localStorage.setItem("user", JSON.stringify(response.data));
+                    this.$router.push({ path: "/Tasks" });
+                  })
+                  .catch(error => console.log(error));
+              } catch (error) {}
+            } else {
               this.$q.notify({
-                color: "green-4",
+                color: "red-4",
                 textColor: "white",
-                icon: "cloud_done",
-                message: "Registrado"
+                icon: "warning",
+                message: "Verifica tu correo"
               });
-              this.$router.push({ path: "/Tasks" });
-              localStorage.setItem("user", JSON.stringify(response.data));
-            })
-            .catch(error => console.log(error));
-        } else {
-          this.$q.notify({
-            color: "red-4",
-            textColor: "white",
-            icon: "warning",
-            message: "Verifica tu correo"
-          });
+            }
+          } else {
+            this.$q.notify({
+              color: "red-4",
+              textColor: "white",
+              icon: "warning",
+              message: "Verifica tus datos"
+            });
+          }
+          clearInterval(this.interval);
+          this.progress.loading = false;
         }
-      } else {
-        this.$q.notify({
-          color: "red-4",
-          textColor: "white",
-          icon: "warning",
-          message: "Verifica tus datos"
-        });
-        return;
-      }
+      }, 300);
     }
   },
   computed: {
