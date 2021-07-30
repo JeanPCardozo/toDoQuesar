@@ -121,32 +121,39 @@ export default {
             if (this.validateEmail) {
               const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
               const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
-              try {
-                this.$axios
-                  .post(URL, {
-                    email: this.email,
-                    password: this.pass,
-                    returnSecureToken: true
-                  })
-                  .then(response => {
-                    this.$q.notify({
-                      color: "green-4",
-                      textColor: "white",
-                      icon: "cloud_done",
-                      message: "Has Iniciado sesión"
-                    });
-                    localStorage.setItem("user", JSON.stringify(response.data));
-                    this.$router.push({ path: "/Tasks" });
-                  })
-                  .catch(error => {
-                    this.$q.notify({
-                      color: "red-4",
-                      textColor: "white",
-                      icon: "warning",
-                      message: "Correo y/o contraseña incorrecta"
-                    });
+
+              this.$axios
+                .post(URL, {
+                  email: this.email,
+                  password: this.pass,
+                  returnSecureToken: true
+                })
+                .then(response => {
+                  this.$q.notify({
+                    color: "green-4",
+                    textColor: "white",
+                    icon: "cloud_done",
+                    message: "Has Iniciado sesión"
                   });
-              } catch (error) {}
+                  localStorage.setItem("user", JSON.stringify(response.data));
+                  this.$router.push({ path: "/Tasks" });
+                })
+                .catch(error => {
+                  if (error.response) {
+                    let { data } = error.response;
+                    if (
+                      data.error.message == "INVALID_PASSWORD" ||
+                      data.error.message == "EMAIL_NOT_FOUND"
+                    ) {
+                      this.$q.notify({
+                        color: "red-4",
+                        textColor: "white",
+                        icon: "warning",
+                        message: "Correo y/o contraseña incorrecta"
+                      });
+                    }
+                  }
+                });
             } else {
               this.$q.notify({
                 color: "red-4",
