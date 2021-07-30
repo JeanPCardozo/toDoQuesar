@@ -13,112 +13,84 @@
           {{ user.email | username }}
         </div>
         <div class="text-subtitle1">{{ user.email }}</div>
-        <q-form @submit="update" class="q-ma-md">
-          <div class="row justify-center">
-            <q-input
-              color="white"
-              standout="bg-info text-white"
-              class=" col-md-6 col-xs-12"
-              type="email"
-              filled
-              v-model="email"
-              label="Digita tu correo"
-              lazy-rules
-              :rules="[
-                val => (val && val.length > 0) || 'por favor digita tu correo'
-              ]"
-            />
-          </div>
-          <div class="row justify-end">
-            <q-btn
-              :loading="progress.loading"
-              :percentage="progress.percentage"
-              dark-percentage
-              unelevated
-              rounded
-              push
-              label="Guardar Datos"
-              size="sm"
-              type="submit"
-              color="green"
-            />
-          </div>
-        </q-form>
+
+        <div class="row justify-center q-ma-md q-gutter-md">
+          <q-btn
+            icon="update"
+            class="bg-teal text-white"
+            rounded
+            push
+            @click="
+              showFormEmail = true;
+              showFormPass = false;
+            "
+            >Actualizar Correo</q-btn
+          >
+          <q-btn
+            icon="update"
+            class="bg-teal text-white"
+            rounded
+            push
+            @click="
+              showFormEmail = false;
+              showFormPass = true;
+            "
+            >Actualizar Contraseña</q-btn
+          >
+        </div>
+
+        <p
+          v-if="!showFormEmail && !showFormPass"
+          class="text-center text-white text-body1 q-ma-xl"
+        >
+          Selecciona una opción para realizar tus actualizaciones
+          <br />
+          <q-icon
+            class="q-mt-md"
+            name="manage_accounts"
+            style="font-size:80px"
+          ></q-icon>
+        </p>
+        <updateEmail @hidden="showFormEmail = false" v-if="showFormEmail" />
+        <updatePass @hidden="showFormPass = false" v-if="showFormPass" />
       </div>
     </q-img>
   </div>
 </template>
 
 <script>
+import updateEmail from "../components/updateEmail.vue";
+import updatePass from "../components/updatePass.vue";
 export default {
   data: () => ({
     user: JSON.parse(localStorage.getItem("user")),
-    email: "",
-    progress: {
-      loading: false,
-      percentage: 0
-    },
-    interval: null
+    showFormEmail: false,
+    showFormPass: false
   }),
-  methods: {
-    async update() {
-      this.progress.loading = true;
-      this.progress.percentage = 0;
-
-      this.interval = await setInterval(() => {
-        this.progress.percentage += Math.floor(Math.random() * 20);
-
-        if (this.progress.percentage >= 100) {
-          if (this.email != "") {
-            if (this.validateEmail) {
-              const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-              const URL = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${apiKey}`;
-              try {
-                this.$axios
-                  .post(URL, {
-                    idToken: this.user.idToken,
-                    email: this.email,
-                    returnSecureToken: true
-                  })
-                  .then(response => {
-                    this.$q.notify({
-                      color: "green-4",
-                      textColor: "white",
-                      icon: "cloud_done",
-                      message: "Datos guadados"
-                    });
-                    localStorage.setItem("user", JSON.stringify(response.data));
-                    this.$router.push({ path: "/Tasks" });
-                  })
-                  .catch(error => console.log(error));
-              } catch (error) {}
-            } else {
-              this.$q.notify({
-                color: "red-4",
-                textColor: "white",
-                icon: "warning",
-                message: "Verifica tu correo"
-              });
-            }
-          } else {
-            this.$q.notify({
-              color: "red-4",
-              textColor: "white",
-              icon: "warning",
-              message: "Verifica tus datos"
-            });
-          }
-          clearInterval(this.interval);
-          this.progress.loading = false;
-        }
-      }, 300);
-    }
+  components: {
+    updateEmail,
+    updatePass
   },
-  computed: {
-    validateEmail() {
-      const reLargo = /^(([^<>()\[\]\\.,;:\s@”]+(\.[^<>()\[\]\\.,;:\s@”]+)*)|(“.+”))@((\[[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}])|(([a-zA-Z\-0–9]+\.)+[a-zA-Z]{2,}))$/;
-      return reLargo.test(this.email);
-    }
+  methods: {
+    /*async verificarCorreo() {
+      const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+      await this.$axios
+        .post(
+          `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
+          {
+            requestType: "VERIFY_EMAIL",
+            idToken: this.user.idToken
+          }
+        )
+        .then(() => {
+          this.$q.notify({
+            color: "green-4",
+            textColor: "white",
+            icon: "cloud_done",
+            message: "correo enviado"
+          });
+        });
+    }*/
   },
   filters: {
     username(email) {
@@ -132,7 +104,7 @@ export default {
       return email.slice(0, numberText);
     }
   },
-  mounted() {
+  updated() {
     this.email = this.user.email;
   }
 };
