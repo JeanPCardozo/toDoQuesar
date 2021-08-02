@@ -192,17 +192,23 @@ export default {
                 color: "green-4",
                 textColor: "white",
                 icon: "cloud_done",
-                message: "Correo enviado"
+                message:
+                  "Correo enviado, por favor verifica en correos no deseados"
               });
             }
           });
       } catch (error) {
-        this.$q.notify({
-          color: "red-4",
-          textColor: "white",
-          icon: "warning",
-          message: "Correo inválido"
-        });
+        if (error.response) {
+          let { data } = error.response;
+          if ((data.error.message = "EMAIL_NOT_FOUND")) {
+            this.$q.notify({
+              color: "red-4",
+              textColor: "white",
+              icon: "warning",
+              message: "Correo inválido"
+            });
+          }
+        }
       }
     }
   },
