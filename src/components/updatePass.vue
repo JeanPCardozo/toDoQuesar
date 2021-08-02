@@ -105,7 +105,26 @@ export default {
                   localStorage.setItem("user", JSON.stringify(response.data));
                   this.$emit("hidden");
                 })
-                .catch(error => console.log(error));
+                .catch(error => {
+                  console.log(error.response);
+                  if (error.response) {
+                    let { data } = error.response;
+                    if (
+                      data.error.message ==
+                      "INVALID_REQ_TYPE : Unsupported request parameters."
+                    ) {
+                      localStorage.removeItem("user");
+                      this.$router.push({ path: "/LogIn" });
+                      this.$q.notify({
+                        color: "red-4",
+                        textColor: "white",
+                        icon: "warning",
+                        message:
+                          "La sesión ha caducado. Vuelve a iniciar sesión"
+                      });
+                    }
+                  }
+                });
             } catch (error) {}
           } else {
             this.$q.notify({
