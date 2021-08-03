@@ -78,66 +78,76 @@ export default {
       this.$emit("hidden");
     },
     updatePass() {
-      this.progress.loading = true;
-      this.progress.percentage = 0;
+      if (navigator.onLine) {
+        this.progress.loading = true;
+        this.progress.percentage = 0;
 
-      this.interval = setInterval(() => {
-        this.progress.percentage += Math.floor(Math.random() * 20);
+        this.interval = setInterval(() => {
+          this.progress.percentage += Math.floor(Math.random() * 20);
 
-        if (this.progress.percentage >= 100) {
-          if (this.pass != "" && this.pass.length >= 6) {
-            const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-            const URL = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${apiKey}`;
-            try {
-              this.$axios
-                .post(URL, {
-                  idToken: this.user.idToken,
-                  password: this.pass,
-                  returnSecureToken: true
-                })
-                .then(response => {
-                  this.$q.notify({
-                    color: "green-4",
-                    textColor: "white",
-                    icon: "cloud_done",
-                    message: "Datos guadados"
-                  });
-                  localStorage.setItem("user", JSON.stringify(response.data));
-                  this.$emit("hidden");
-                })
-                .catch(error => {
-                  console.log(error.response);
-                  if (error.response) {
-                    let { data } = error.response;
-                    if (
-                      data.error.message ==
-                      "INVALID_REQ_TYPE : Unsupported request parameters."
-                    ) {
-                      localStorage.removeItem("user");
-                      this.$router.push({ path: "/LogIn" });
-                      this.$q.notify({
-                        color: "red-4",
-                        textColor: "white",
-                        icon: "warning",
-                        message:
-                          "La sesión ha caducado. Vuelve a iniciar sesión"
-                      });
+          if (this.progress.percentage >= 100) {
+            if (this.pass != "" && this.pass.length >= 6) {
+              const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+              const URL = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${apiKey}`;
+              try {
+                this.$axios
+                  .post(URL, {
+                    idToken: this.user.idToken,
+                    password: this.pass,
+                    returnSecureToken: true
+                  })
+                  .then(response => {
+                    this.$q.notify({
+                      color: "green-4",
+                      textColor: "white",
+                      icon: "cloud_done",
+                      message: "Datos guadados"
+                    });
+                    localStorage.setItem("user", JSON.stringify(response.data));
+                    this.$emit("hidden");
+                  })
+                  .catch(error => {
+                    console.log(error.response);
+                    if (error.response) {
+                      let { data } = error.response;
+                      if (
+                        data.error.message ==
+                        "INVALID_REQ_TYPE : Unsupported request parameters."
+                      ) {
+                        localStorage.removeItem("user");
+                        this.$router.push({ path: "/LogIn" });
+                        this.$q.notify({
+                          color: "red-4",
+                          textColor: "white",
+                          icon: "warning",
+                          message:
+                            "La sesión ha caducado. Vuelve a iniciar sesión"
+                        });
+                      }
                     }
-                  }
-                });
-            } catch (error) {}
-          } else {
-            this.$q.notify({
-              color: "red-4",
-              textColor: "white",
-              icon: "warning",
-              message: "Verifica tus datos"
-            });
+                  });
+              } catch (error) {}
+            } else {
+              this.$q.notify({
+                color: "red-4",
+                textColor: "white",
+                icon: "warning",
+                message: "Verifica tus datos"
+              });
+            }
+            clearInterval(this.interval);
+            this.progress.loading = false;
           }
-          clearInterval(this.interval);
-          this.progress.loading = false;
-        }
-      }, 300);
+        }, 300);
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     }
   }
 };

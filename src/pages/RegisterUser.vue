@@ -96,60 +96,73 @@ export default {
 
   methods: {
     async onSubmit() {
-      this.progress.loading = true;
-      this.progress.percentage = 0;
+      if (navigator.onLine) {
+        this.progress.loading = true;
+        this.progress.percentage = 0;
 
-      this.interval = await setInterval(() => {
-        this.progress.percentage += Math.floor(Math.random() * 20);
+        this.interval = await setInterval(() => {
+          this.progress.percentage += Math.floor(Math.random() * 20);
 
-        if (this.progress.percentage >= 100) {
-          if (
-            this.pass1 === this.pass2 &&
-            this.pass1.length >= 6 &&
-            this.email != ""
-          ) {
-            if (this.validateEmail) {
-              const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-              const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
-              try {
-                this.$axios
-                  .post(URL, {
-                    email: this.email,
-                    password: this.pass1,
-                    returnSecureToken: true
-                  })
-                  .then(response => {
-                    this.$q.notify({
-                      color: "green-4",
-                      textColor: "white",
-                      icon: "cloud_done",
-                      message: "Registrado"
-                    });
-                    localStorage.setItem("user", JSON.stringify(response.data));
-                    this.$router.push({ path: "/Tasks" });
-                  })
-                  .catch(error => console.log(error));
-              } catch (error) {}
+          if (this.progress.percentage >= 100) {
+            if (
+              this.pass1 === this.pass2 &&
+              this.pass1.length >= 6 &&
+              this.email != ""
+            ) {
+              if (this.validateEmail) {
+                const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+                const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+                try {
+                  this.$axios
+                    .post(URL, {
+                      email: this.email,
+                      password: this.pass1,
+                      returnSecureToken: true
+                    })
+                    .then(response => {
+                      this.$q.notify({
+                        color: "green-4",
+                        textColor: "white",
+                        icon: "cloud_done",
+                        message: "Registrado"
+                      });
+                      localStorage.setItem(
+                        "user",
+                        JSON.stringify(response.data)
+                      );
+                      this.$router.push({ path: "/Tasks" });
+                    })
+                    .catch(error => console.log(error));
+                } catch (error) {}
+              } else {
+                this.$q.notify({
+                  color: "red-4",
+                  textColor: "white",
+                  icon: "warning",
+                  message: "Verifica tu correo"
+                });
+              }
             } else {
               this.$q.notify({
                 color: "red-4",
                 textColor: "white",
                 icon: "warning",
-                message: "Verifica tu correo"
+                message: "Verifica tus datos"
               });
             }
-          } else {
-            this.$q.notify({
-              color: "red-4",
-              textColor: "white",
-              icon: "warning",
-              message: "Verifica tus datos"
-            });
+            clearInterval(this.interval);
+            this.progress.loading = false;
           }
-          clearInterval(this.interval);
-          this.progress.loading = false;
-        }
-      }, 300);
+        }, 300);
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     }
   },
   computed: {

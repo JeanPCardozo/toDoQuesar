@@ -94,123 +94,186 @@ export default {
       }
     },
     async updateStatus(id, info) {
-      await this.$axios
-        .put(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
-          {
-            description: info.description,
-            check: !!info.check,
-            status: true
-          }
-        )
-        .then(() => this.$mount());
+      if (navigator.onLine) {
+        await this.$axios
+          .put(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
+            {
+              description: info.description,
+              check: !!info.check,
+              status: true
+            }
+          )
+          .then(() => this.$mount())
+          .catch(error => {});
 
-      this.CheckTasks();
+        this.CheckTasks();
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     },
     async listTasks() {
-      this.tasks = [];
-      const { data } = await this.$axios.get(
-        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`
-      );
+      if (navigator.onLine) {
+        this.tasks = [];
+        const { data } = await this.$axios.get(
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`
+        );
 
-      for (let item in data) {
-        if (data[item].status === true) {
-          this.tasks.push({
-            id: item,
-            data: data[item]
-          });
+        for (let item in data) {
+          if (data[item].status === true) {
+            this.tasks.push({
+              id: item,
+              data: data[item]
+            });
+          }
         }
-      }
 
-      this.CheckTasks();
+        this.CheckTasks();
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     },
     async createTask() {
-      await this.$axios
-        .post(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`,
-          {
-            check: false,
-            description: this.editorTrim,
-            status: true
-          }
-        )
-        .then(() => this.listTasks());
-      this.editor = "";
-      this.CheckTasks();
-
-      this.$q.notify({
-        message: "Tarea Guardada",
-        color: "green-4",
-        textColor: "white",
-        icon: "cloud_done"
-      });
+      if (navigator.onLine) {
+        await this.$axios
+          .post(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`,
+            {
+              check: false,
+              description: this.editorTrim,
+              status: true
+            }
+          )
+          .then(() => {
+            this.listTasks();
+            this.editor = "";
+            this.CheckTasks();
+            this.$q.notify({
+              message: "Tarea Guardada",
+              color: "green-4",
+              textColor: "white",
+              icon: "cloud_done"
+            });
+          })
+          .catch(error => {});
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     },
     deleteTask(id, info) {
-      this.$q
-        .dialog({
-          title: "Eliminar Tarea",
-          message: "¿Estás seguro de eliminar esta tarea?",
-          cancel: true,
-          persistent: true
-        })
-        .onOk(async () => {
-          await this.$axios
-            .put(
-              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
-              {
-                description: info.description,
-                check: !!info.check,
-                status: false
-              }
-            )
-            .then(() => {
-              this.$q.notify({
-                message: "tarea eliminada",
-                color: "green-4",
-                textColor: "white",
-                icon: "cloud_done"
+      if (navigator.onLine) {
+        this.$q
+          .dialog({
+            title: "Eliminar Tarea",
+            message: "¿Estás seguro de eliminar esta tarea?",
+            cancel: true,
+            persistent: true
+          })
+          .onOk(async () => {
+            await this.$axios
+              .put(
+                `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`,
+                {
+                  description: info.description,
+                  check: !!info.check,
+                  status: false
+                }
+              )
+              .then(() => {
+                this.$q.notify({
+                  message: "tarea eliminada",
+                  color: "green-4",
+                  textColor: "white",
+                  icon: "cloud_done"
+                });
+                this.listTasks();
               });
-              this.listTasks();
-            });
 
-          this.CheckTasks();
+            this.CheckTasks();
+          });
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
         });
+      }
     },
     async editTask(id) {
-      this.editionStatus = true;
-      const { data } = await this.$axios.get(
-        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`
-      );
+      if (navigator.onLine) {
+        this.editionStatus = true;
+        const { data } = await this.$axios.get(
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`
+        );
 
-      this.editor = data.description;
-      this.idEdit = id;
+        this.editor = data.description;
+        this.idEdit = id;
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     },
     async updateTask() {
-      const { data } = await this.$axios.get(
-        `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`
-      );
+      if (navigator.onLine) {
+        const { data } = await this.$axios.get(
+          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`
+        );
 
-      await this.$axios
-        .put(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`,
-          {
-            description: this.editorTrim,
-            status: data.status,
-            check: data.check
-          }
-        )
-        .then(() => {
-          this.editionStatus = false;
-          this.editor = "";
-          this.listTasks();
+        await this.$axios
+          .put(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`,
+            {
+              description: this.editorTrim,
+              status: data.status,
+              check: data.check
+            }
+          )
+          .then(() => {
+            this.editionStatus = false;
+            this.editor = "";
+            this.listTasks();
 
-          this.$q.notify({
-            message: "Tarea Actualizada",
-            color: "green-4",
-            textColor: "white",
-            icon: "cloud_done"
+            this.$q.notify({
+              message: "Tarea Actualizada",
+              color: "green-4",
+              textColor: "white",
+              icon: "cloud_done"
+            });
           });
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
         });
+      }
     },
     CheckTasks() {
       this.countCheckedTasks = 0;

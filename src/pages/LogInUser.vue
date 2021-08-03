@@ -110,105 +110,126 @@ export default {
 
   methods: {
     async onSubmit() {
-      this.progress.loading = true;
-      this.progress.percentage = 0;
+      if (navigator.onLine) {
+        this.progress.loading = true;
+        this.progress.percentage = 0;
 
-      this.interval = await setInterval(() => {
-        this.progress.percentage += Math.floor(Math.random() * 20);
+        this.interval = await setInterval(() => {
+          this.progress.percentage += Math.floor(Math.random() * 20);
 
-        if (this.progress.percentage >= 100) {
-          if (this.pass.length >= 6 && this.email != "") {
-            if (this.validateEmail) {
-              const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-              const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
+          if (this.progress.percentage >= 100) {
+            if (this.pass.length >= 6 && this.email != "") {
+              if (this.validateEmail) {
+                const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+                const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
 
-              this.$axios
-                .post(URL, {
-                  email: this.email,
-                  password: this.pass,
-                  returnSecureToken: true
-                })
-                .then(response => {
-                  this.$q.notify({
-                    color: "green-4",
-                    textColor: "white",
-                    icon: "cloud_done",
-                    message: "Has Iniciado sesión"
-                  });
-                  localStorage.setItem("user", JSON.stringify(response.data));
-                  this.$router.push({ path: "/Tasks" });
-                })
-                .catch(error => {
-                  if (error.response) {
-                    let { data } = error.response;
-                    if (
-                      data.error.message == "INVALID_PASSWORD" ||
-                      data.error.message == "EMAIL_NOT_FOUND"
-                    ) {
-                      this.$q.notify({
-                        color: "red-4",
-                        textColor: "white",
-                        icon: "warning",
-                        message: "Correo y/o contraseña incorrecta"
-                      });
+                this.$axios
+                  .post(URL, {
+                    email: this.email,
+                    password: this.pass,
+                    returnSecureToken: true
+                  })
+                  .then(response => {
+                    this.$q.notify({
+                      color: "green-4",
+                      textColor: "white",
+                      icon: "cloud_done",
+                      message: "Has Iniciado sesión"
+                    });
+                    localStorage.setItem("user", JSON.stringify(response.data));
+                    this.$router.push({ path: "/Tasks" });
+                  })
+                  .catch(error => {
+                    if (error.response) {
+                      let { data } = error.response;
+                      if (
+                        data.error.message == "INVALID_PASSWORD" ||
+                        data.error.message == "EMAIL_NOT_FOUND"
+                      ) {
+                        this.$q.notify({
+                          color: "red-4",
+                          textColor: "white",
+                          icon: "warning",
+                          message: "Correo y/o contraseña incorrecta"
+                        });
+                      }
                     }
-                  }
+                  });
+              } else {
+                this.$q.notify({
+                  color: "red-4",
+                  textColor: "white",
+                  icon: "warning",
+                  message: "Verifica tu correo"
                 });
+              }
             } else {
               this.$q.notify({
                 color: "red-4",
                 textColor: "white",
                 icon: "warning",
-                message: "Verifica tu correo"
+                message: "Verifica tus datos"
               });
+              return;
             }
-          } else {
-            this.$q.notify({
-              color: "red-4",
-              textColor: "white",
-              icon: "warning",
-              message: "Verifica tus datos"
-            });
-            return;
+            clearInterval(this.interval);
+            this.progress.loading = false;
           }
-          clearInterval(this.interval);
-          this.progress.loading = false;
-        }
-      }, 300);
+        }, 300);
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
+      }
     },
+
     async recoverPassword() {
-      const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-      const URL = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`;
-      try {
-        await this.$axios
-          .post(URL, {
-            email: this.address,
-            requestType: "PASSWORD_RESET"
-          })
-          .then(result => {
-            if (result.status == 200) {
-              this.address = "";
+      if (navigator.onLine) {
+        const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
+        const URL = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`;
+        try {
+          await this.$axios
+            .post(URL, {
+              email: this.address,
+              requestType: "PASSWORD_RESET"
+            })
+            .then(result => {
+              if (result.status == 200) {
+                this.address = "";
+                this.$q.notify({
+                  color: "green-4",
+                  textColor: "white",
+                  icon: "cloud_done",
+                  message:
+                    "Correo enviado, por favor verifica en correos no deseados"
+                });
+              }
+            });
+        } catch (error) {
+          if (error.response) {
+            let { data } = error.response;
+            if ((data.error.message = "EMAIL_NOT_FOUND")) {
               this.$q.notify({
-                color: "green-4",
+                color: "red-4",
                 textColor: "white",
-                icon: "cloud_done",
-                message:
-                  "Correo enviado, por favor verifica en correos no deseados"
+                icon: "warning",
+                message: "Correo inválido"
               });
             }
-          });
-      } catch (error) {
-        if (error.response) {
-          let { data } = error.response;
-          if ((data.error.message = "EMAIL_NOT_FOUND")) {
-            this.$q.notify({
-              color: "red-4",
-              textColor: "white",
-              icon: "warning",
-              message: "Correo inválido"
-            });
           }
         }
+      } else {
+        this.$q.notify({
+          color: "negative",
+          position: "top",
+          icon: "signal_wifi_statusbar_connected_no_internet_4",
+          message: "Por favor conectate a internet",
+          timeout: 2000
+        });
       }
     }
   },
