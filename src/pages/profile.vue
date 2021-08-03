@@ -1,11 +1,11 @@
 <template>
   <div>
     <q-img
-      class="absolute-top"
-      src="https://cdn.quasar.dev/img/material.png"
+      class="fixed"
+      src="../../public/background.jpg"
       style="height:100%"
     >
-      <div class="absolute-top bg-transparent">
+      <div class="fixed-full">
         <q-avatar size="100px" class="q-mt-xl">
           <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
         </q-avatar>

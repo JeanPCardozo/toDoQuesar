@@ -26,7 +26,7 @@
       <q-scroll-area
         :style="
           !visible
-            ? 'height: calc(100% - 250px); margin-top: 150px; border-right: 1px solid #ddd'
+            ? 'height: calc(100% - 270px); margin-top: 170px; border-right: 1px solid #ddd'
             : 'height:100%'
         "
       >
@@ -42,11 +42,11 @@
       ></q-scroll-area>
       <q-img
         v-if="!visible"
-        class="absolute-top"
-        src="https://cdn.quasar.dev/img/material.png"
-        style="height: 150px"
+        class="fixed-top"
+        src="../../public/background.jpg"
+        style="height: 170px;"
       >
-        <div class="absolute-bottom bg-transparent">
+        <div class="fixed-bottom">
           <q-avatar size="56px" class="q-mb-sm">
             <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
           </q-avatar>
@@ -55,7 +55,7 @@
           </div>
           <div>{{ email }}</div>
           <div class="row justify-end">
-            <q-btn rounded color="" to="/Profile" size="sm">Editar Datos</q-btn>
+            <q-btn rounded outline class="q-mt-md" to="/Profile" size="sm">Editar Datos</q-btn>
           </div>
         </div>
       </q-img>
