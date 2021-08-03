@@ -71,27 +71,6 @@ export default {
     updateEmail,
     updatePass
   },
-  methods: {
-    /*async verificarCorreo() {
-      const apiKey = "AIzaSyDiStz7omsuavpzOm5kAYhnBs-mjs8fOMs";
-      await this.$axios
-        .post(
-          `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
-          {
-            requestType: "VERIFY_EMAIL",
-            idToken: this.user.idToken
-          }
-        )
-        .then(() => {
-          this.$q.notify({
-            color: "green-4",
-            textColor: "white",
-            icon: "cloud_done",
-            message: "correo enviado"
-          });
-        });
-    }*/
-  },
   filters: {
     username(email) {
       let arrayText = email.split("");
