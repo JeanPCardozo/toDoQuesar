@@ -97,7 +97,6 @@ export default {
                     });
                     localStorage.setItem("user", JSON.stringify(response.data));
                     this.$emit("hidden");
-                    this.$emit("email",this.email)
                   })
                   .catch(error => {
                     if (error.response) {

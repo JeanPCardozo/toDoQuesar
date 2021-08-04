@@ -47,7 +47,7 @@
             style="font-size:80px"
           ></q-icon>
         </p>
-        <updateEmail @hidden="showFormEmail = false" v-if="showFormEmail" />
+        <updateEmail @hidden="hiddenForm" v-if="showFormEmail" />
         <updatePass @hidden="showFormPass = false" v-if="showFormPass" />
       </div>
     </q-img>
@@ -66,6 +66,12 @@ export default {
   components: {
     updateEmail,
     updatePass
+  },
+  methods: {
+    hiddenForm() {
+      this.user = JSON.parse(localStorage.getItem("user"));
+      this.showFormEmail = false;
+    }
   },
   filters: {
     username(email) {
