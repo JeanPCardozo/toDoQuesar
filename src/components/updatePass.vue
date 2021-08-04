@@ -107,7 +107,6 @@ export default {
                     this.$emit("hidden");
                   })
                   .catch(error => {
-                    console.log(error.response);
                     if (error.response) {
                       let { data } = error.response;
                       if (

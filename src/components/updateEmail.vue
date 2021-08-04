@@ -97,11 +97,11 @@ export default {
                     });
                     localStorage.setItem("user", JSON.stringify(response.data));
                     this.$emit("hidden");
+                    this.$emit("email",this.email)
                   })
                   .catch(error => {
                     if (error.response) {
                       let { data } = error.response;
-                      console.log(data);
                       if (
                         data.error.message ==
                           "CREDENTIAL_TOO_OLD_LOGIN_AGAIN" ||
