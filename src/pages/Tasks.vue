@@ -25,7 +25,7 @@
           handler: this.cancelUpdate
         }
       }"
-      :toolbar="[['createUpdate'], this.editionStatus ? ['cancel'] : []]"
+      :toolbar="[['createUpdate'], [this.editionStatus ? 'cancel' : '']]"
     />
 
     <div>
