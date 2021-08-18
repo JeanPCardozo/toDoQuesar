@@ -18,9 +18,14 @@
           icon: this.editionStatus ? 'update' : 'save',
           label: this.editionStatus ? 'Actualizar' : 'Guardar',
           handler: this.saveOrEditTask
+        },
+        cancel: {
+          label: 'Cancelar',
+          icon: 'cancel',
+          handler: this.cancelUpdate
         }
       }"
-      :toolbar="[, ['createUpdate']]"
+      :toolbar="[['createUpdate'], this.editionStatus ? ['cancel'] : []]"
     />
 
     <div>
@@ -56,7 +61,7 @@
       <q-card-section
         :class="task.data.check ? 'tachar' : ''"
         class="col"
-        v-html="task.data.description"
+        v-html="limitText(task.data.description)"
       />
       <q-btn flat color="warning" icon="edit" @click="editTask(task.id)" />
       <q-btn
@@ -86,6 +91,17 @@ export default {
     user: JSON.parse(localStorage.getItem("user"))
   }),
   methods: {
+    cancelUpdate() {
+      this.editionStatus = false;
+      this.editor = "";
+    },
+    limitText(text) {
+      if (text.length > 35) {
+        return `${text.substr(0, 35)}...`;
+      } else {
+        return text;
+      }
+    },
     saveOrEditTask() {
       if (this.editionStatus) {
         this.updateTask();
@@ -147,27 +163,36 @@ export default {
     },
     async createTask() {
       if (navigator.onLine) {
-        await this.$axios
-          .post(
-            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`,
-            {
-              check: false,
-              description: this.editorTrim,
-              status: true
-            }
-          )
-          .then(() => {
-            this.listTasks();
-            this.editor = "";
-            this.CheckTasks();
-            this.$q.notify({
-              message: "Tarea Guardada",
-              color: "green-4",
-              textColor: "white",
-              icon: "cloud_done"
-            });
-          })
-          .catch(error => {});
+        if (this.editorTrim) {
+          await this.$axios
+            .post(
+              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`,
+              {
+                check: false,
+                description: this.editorTrim,
+                status: true
+              }
+            )
+            .then(() => {
+              this.listTasks();
+              this.editor = "";
+              this.CheckTasks();
+              this.$q.notify({
+                message: "Tarea Guardada",
+                color: "green-4",
+                textColor: "white",
+                icon: "cloud_done"
+              });
+            })
+            .catch(error => {});
+        } else {
+          this.$q.notify({
+            textColor: "grey-8",
+            color: "yellow-4",
+            icon: "warning",
+            message: "Estás creando una tarea si texto"
+          });
+        }
       } else {
         this.$q.notify({
           color: "negative",
