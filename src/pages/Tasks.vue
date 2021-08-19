@@ -121,7 +121,12 @@ export default {
             }
           )
           .then(() => this.$mount())
-          .catch(error => {});
+          .catch(error => {
+            if (error.response) {
+              let { data } = error.response;
+              //console.log(data);
+            }
+          });
 
         this.CheckTasks();
       } else {
@@ -137,9 +142,16 @@ export default {
     async listTasks() {
       if (navigator.onLine) {
         this.tasks = [];
-        const { data } = await this.$axios.get(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`
-        );
+        const { data } = await this.$axios
+          .get(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}.json?auth=${this.user.idToken}`
+          )
+          .catch(error => {
+            if (error.response) {
+              let { data } = error.response;
+              // console.log(data);
+            }
+          });
 
         for (let item in data) {
           if (data[item].status === true) {
@@ -184,7 +196,12 @@ export default {
                 icon: "cloud_done"
               });
             })
-            .catch(error => {});
+            .catch(error => {
+              if (error.response) {
+                let { data } = error.response;
+                //console.log(data);
+              }
+            });
         } else {
           this.$q.notify({
             textColor: "grey-8",
@@ -230,6 +247,12 @@ export default {
                   icon: "cloud_done"
                 });
                 this.listTasks();
+              })
+              .catch(error => {
+                if (error.response) {
+                  let { data } = error.response;
+                  //console.log(data);
+                }
               });
 
             this.CheckTasks();
@@ -247,9 +270,16 @@ export default {
     async editTask(id) {
       if (navigator.onLine) {
         this.editionStatus = true;
-        const { data } = await this.$axios.get(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`
-        );
+        const { data } = await this.$axios
+          .get(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${id}.json?auth=${this.user.idToken}`
+          )
+          .catch(error => {
+            if (error.response) {
+              let { data } = error.response;
+              //console.log(data);
+            }
+          });
 
         this.editor = data.description;
         this.idEdit = id;
@@ -265,31 +295,53 @@ export default {
     },
     async updateTask() {
       if (navigator.onLine) {
-        const { data } = await this.$axios.get(
-          `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`
-        );
-
-        await this.$axios
-          .put(
-            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`,
-            {
-              description: this.editorTrim,
-              status: data.status,
-              check: data.check
-            }
+        const { data } = await this.$axios
+          .get(
+            `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`
           )
-          .then(() => {
-            this.editionStatus = false;
-            this.editor = "";
-            this.listTasks();
-
-            this.$q.notify({
-              message: "Tarea Actualizada",
-              color: "green-4",
-              textColor: "white",
-              icon: "cloud_done"
-            });
+          .catch(error => {
+            if (error.response) {
+              let { data } = error.response;
+              //console.log(data);
+            }
           });
+
+        if (this.editorTrim) {
+          await this.$axios
+            .put(
+              `https://todoquasar-9b9ee-default-rtdb.firebaseio.com/tasks/${this.user.localId}/${this.idEdit}.json?auth=${this.user.idToken}`,
+              {
+                description: this.editorTrim,
+                status: data.status,
+                check: data.check
+              }
+            )
+            .then(() => {
+              this.editionStatus = false;
+              this.editor = "";
+              this.listTasks();
+
+              this.$q.notify({
+                message: "Tarea Actualizada",
+                color: "green-4",
+                textColor: "white",
+                icon: "cloud_done"
+              });
+            })
+            .catch(error => {
+              if (error.response) {
+                let { data } = error.response;
+                //console.log(data);
+              }
+            });
+        } else {
+          this.$q.notify({
+            textColor: "grey-8",
+            color: "yellow-4",
+            icon: "warning",
+            message: "Estás creando una tarea si texto"
+          });
+        }
       } else {
         this.$q.notify({
           color: "negative",

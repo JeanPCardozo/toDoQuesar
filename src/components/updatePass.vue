@@ -111,7 +111,9 @@ export default {
                       let { data } = error.response;
                       if (
                         data.error.message ==
-                        "INVALID_REQ_TYPE : Unsupported request parameters."
+                          "CREDENTIAL_TOO_OLD_LOGIN_AGAIN" ||
+                        data.error.message ==
+                          "INVALID_REQ_TYPE : Unsupported request parameters."
                       ) {
                         localStorage.removeItem("user");
                         this.$router.push({ path: "/LogIn" });
